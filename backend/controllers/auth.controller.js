@@ -1,7 +1,8 @@
 import bcryptjs from "bcryptjs";
 import User from "../models/user.model.js";
+import { errorHandler } from "../utils/error.js";
 
-export const signup = async (req, res) => {
+export const signup = async (req, res, next) => {
   const { username, email, password } = req.body;
   if (
     !username ||
@@ -11,9 +12,9 @@ export const signup = async (req, res) => {
     email === "" ||
     password === ""
   ) {
-    return res.status(400).json({
-      message: "Te gjitha fushat jane te domosdoshme per tu plotesuar",
-    });
+    return next(
+      errorHandler(400, "Te gjitha fushat jane te domosdoshme te plotesohen")
+    );
   }
   const hashedPassword = bcryptjs.hashSync(password, 10);
   const newUser = new User({
@@ -25,6 +26,6 @@ export const signup = async (req, res) => {
     await newUser.save();
     res.json("Signup u krye me sukses");
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
